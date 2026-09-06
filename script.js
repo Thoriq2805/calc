@@ -2,16 +2,16 @@ let runningTotal = 0;
 let buffer = "0";
 let previousOperator = null;
 
-// Untuk menyimpan operasi terakhir
+// Untuk fitur "=" berulang
 let lastOperator = null;
 let lastNumber = null;
 
 const screen = document.querySelector('.screen');
 
 
-// ==============================
+// =========================
 // BUTTON CLICK
-// ==============================
+// =========================
 
 function buttonClick(value) {
 
@@ -26,15 +26,18 @@ function buttonClick(value) {
 }
 
 
-// ==============================
+// =========================
 // HANDLE SYMBOL
-// ==============================
+// =========================
 
 function handleSymbol(symbol) {
 
     switch (symbol) {
 
+        // =========================
         // CLEAR
+        // =========================
+
         case 'C':
             buffer = '0';
             runningTotal = 0;
@@ -44,7 +47,10 @@ function handleSymbol(symbol) {
             break;
 
 
-        // EQUAL
+        // =========================
+        // EQUALS
+        // =========================
+
         case '=':
 
             // Operasi pertama
@@ -57,10 +63,12 @@ function handleSymbol(symbol) {
 
                 buffer = runningTotal.toString();
 
+                // Simpan operator terakhir
                 previousOperator = null;
+
             }
 
-            // Tekan "=" lagi
+            // Jika "=" ditekan lagi
             else if (lastOperator !== null && lastNumber !== null) {
 
                 previousOperator = lastOperator;
@@ -75,22 +83,32 @@ function handleSymbol(symbol) {
             break;
 
 
+        // =========================
         // BACKSPACE
+        // =========================
+
         case '←':
 
             if (buffer.length === 1) {
+
                 buffer = '0';
+
             } else {
+
                 buffer = buffer.substring(
                     0,
                     buffer.length - 1
                 );
+
             }
 
             break;
 
 
-        // OPERATOR
+        // =========================
+        // OPERATORS
+        // =========================
+
         case '+':
         case '−':
         case '×':
@@ -103,9 +121,9 @@ function handleSymbol(symbol) {
 }
 
 
-// ==============================
+// =========================
 // HANDLE MATH
-// ==============================
+// =========================
 
 function handleMath(symbol) {
 
@@ -126,7 +144,7 @@ function handleMath(symbol) {
 
     }
 
-    // Melanjutkan operasi
+    // Melanjutkan perhitungan
     else if (previousOperator !== null) {
 
         FlushOperation(intBuffer);
@@ -143,19 +161,19 @@ function handleMath(symbol) {
     // Simpan operator
     previousOperator = symbol;
 
-    // Kosongkan buffer
+    // Kosongkan buffer untuk angka berikutnya
     buffer = '0';
 
 
-    // Reset operasi "=" sebelumnya
+    // Reset "=" sebelumnya
     lastOperator = null;
     lastNumber = null;
 }
 
 
-// ==============================
+// =========================
 // FLUSH OPERATION
-// ==============================
+// =========================
 
 function FlushOperation(intBuffer) {
 
@@ -185,9 +203,9 @@ function FlushOperation(intBuffer) {
 }
 
 
-// ==============================
+// =========================
 // HANDLE NUMBER
-// ==============================
+// =========================
 
 function handleNumber(numberString) {
 
@@ -195,7 +213,9 @@ function handleNumber(numberString) {
 
         buffer = numberString;
 
-    } else {
+    }
+
+    else {
 
         buffer += numberString;
 
@@ -203,103 +223,20 @@ function handleNumber(numberString) {
 }
 
 
-// ==============================
-// INITIALIZE
-// ==============================
+// =========================
+// INITIALIZE CALCULATOR
+// =========================
 
 function init() {
 
-    // Tombol kalkulator
     document
         .querySelector('.calc-buttons')
-        .addEventListener('click', function(event) {
+        .addEventListener('click', function (event) {
 
             buttonClick(event.target.innerText);
 
         });
 
-
-    // ==============================
-    // KEYBOARD PC
-    // ==============================
-
-    document.addEventListener('keydown', function(event) {
-
-        const key = event.key;
-
-
-        // ANGKA 0 - 9
-        if (!isNaN(key)) {
-
-            buttonClick(key);
-
-        }
-
-
-        // TAMBAH
-        else if (key === '+') {
-
-            buttonClick('+');
-
-        }
-
-
-        // KURANG
-        else if (key === '-') {
-
-            buttonClick('−');
-
-        }
-
-
-        // KALI
-        else if (key === '*') {
-
-            buttonClick('×');
-
-        }
-
-
-        // BAGI
-        else if (key === '/') {
-
-            event.preventDefault();
-
-            buttonClick('÷');
-
-        }
-
-
-        // ENTER / =
-        else if (
-            key === 'Enter' ||
-            key === '='
-        ) {
-
-            buttonClick('=');
-
-        }
-
-
-        // BACKSPACE
-        else if (key === 'Backspace') {
-
-            buttonClick('←');
-
-        }
-
-
-        // ESC = CLEAR
-        else if (key === 'Escape') {
-
-            buttonClick('C');
-
-        }
-
-    });
-
 }
 
-
-// Jalankan kalkulator
 init();
