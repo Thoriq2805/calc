@@ -1,17 +1,48 @@
-let runningTotal = 0;
+let runningTotal = null;
 let buffer = "0";
 let previousOperator = null;
 
-// Untuk fitur "=" berulang
 let lastOperator = null;
 let lastNumber = null;
 
-const screen = document.querySelector('.screen');
+const screen = document.querySelector(".screen");
+const previousOperation = document.querySelector(".previous-operation");
+const currentNumber = document.querySelector(".current-number");
 
 
-// =========================
-// BUTTON CLICK
-// =========================
+// ===============================
+// FORMAT ANGKA
+// ===============================
+
+function formatNumber(value) {
+    if (value === "Error") {
+        return "Error";
+    }
+
+    const number = Number(value);
+
+    if (!Number.isFinite(number)) {
+        return "Error";
+    }
+
+    return number.toLocaleString("id-ID", {
+        maximumFractionDigits: 10
+    });
+}
+
+
+// ===============================
+// UPDATE LAYAR
+// ===============================
+
+function updateScreen() {
+    currentNumber.innerText = formatNumber(buffer);
+}
+
+
+// ===============================
+// KLIK TOMBOL
+// ===============================
 
 function buttonClick(value) {
 
@@ -21,222 +52,367 @@ function buttonClick(value) {
         handleNumber(value);
     }
 
-    // Menampilkan angka dengan titik ribuan
-    screen.innerText = Number(buffer).toLocaleString('id-ID');
+    updateScreen();
 }
 
 
-// =========================
-// HANDLE SYMBOL
-// =========================
+// ===============================
+// ANGKA
+// ===============================
 
-function handleSymbol(symbol) {
+function handleNumber(number) {
 
-    switch (symbol) {
-
-        // =========================
-        // CLEAR
-        // =========================
-
-        case 'C':
-            buffer = '0';
-            runningTotal = 0;
-            previousOperator = null;
-            lastOperator = null;
-            lastNumber = null;
-            break;
-
-
-        // =========================
-        // EQUALS
-        // =========================
-
-        case '=':
-
-            // Operasi pertama
-            if (previousOperator !== null) {
-
-                lastNumber = parseInt(buffer);
-                lastOperator = previousOperator;
-
-                FlushOperation(lastNumber);
-
-                buffer = runningTotal.toString();
-
-                // Simpan operator terakhir
-                previousOperator = null;
-
-            }
-
-            // Jika "=" ditekan lagi
-            else if (lastOperator !== null && lastNumber !== null) {
-
-                previousOperator = lastOperator;
-
-                FlushOperation(lastNumber);
-
-                buffer = runningTotal.toString();
-
-                previousOperator = null;
-            }
-
-            break;
-
-
-        // =========================
-        // BACKSPACE
-        // =========================
-
-        case '←':
-
-            if (buffer.length === 1) {
-
-                buffer = '0';
-
-            } else {
-
-                buffer = buffer.substring(
-                    0,
-                    buffer.length - 1
-                );
-
-            }
-
-            break;
-
-
-        // =========================
-        // OPERATORS
-        // =========================
-
-        case '+':
-        case '−':
-        case '×':
-        case '÷':
-
-            handleMath(symbol);
-
-            break;
-    }
-}
-
-
-// =========================
-// HANDLE MATH
-// =========================
-
-function handleMath(symbol) {
-
-    if (buffer === '0') {
+    // Maksimal 12 digit
+    if (buffer.replace("-", "").length >= 12) {
         return;
     }
 
-    const intBuffer = parseInt(buffer);
+    // Setelah operator
+    if (previousOperator !== null && buffer === "0") {
+        buffer = number;
+    }
 
+    // Setelah hasil
+    else if (
+        previousOperator === null &&
+        lastOperator !== null &&
+        lastNumber !== null
+    ) {
+        buffer = number;
+
+        runningTotal = null;
+        lastOperator = null;
+        lastNumber = null;
+
+        previousOperation.innerText = "";
+    }
 
     // Angka pertama
+    else if (buffer === "0") {
+        buffer = number;
+    }
+
+    // Tambahkan angka
+    else {
+        buffer += number;
+    }
+}
+
+
+// ===============================
+// SIMBOL
+// ===============================
+
+function handleSymbol(symbol) {
+
+    // CLEAR
+    if (symbol === "C") {
+
+        buffer = "0";
+        runningTotal = null;
+        previousOperator = null;
+
+        lastOperator = null;
+        lastNumber = null;
+
+        previousOperation.innerText = "";
+
+        return;
+    }
+
+
+    // BACKSPACE
+    if (symbol === "←") {
+
+        if (buffer.length <= 1) {
+            buffer = "0";
+        } else {
+            buffer = buffer.slice(0, -1);
+        }
+
+        return;
+    }
+
+
+    // OPERATOR
     if (
-        runningTotal === 0 &&
-        previousOperator === null
+        symbol === "+" ||
+        symbol === "−" ||
+        symbol === "×" ||
+        symbol === "÷"
     ) {
 
-        runningTotal = intBuffer;
+        handleOperator(symbol);
+
+        return;
+    }
+
+
+    // EQUAL
+    if (symbol === "=") {
+
+        handleEquals();
+
+        return;
+    }
+}
+
+
+// ===============================
+// OPERATOR
+// ===============================
+
+function handleOperator(operator) {
+
+    const number = Number(buffer);
+
+
+    // Kalau belum ada total
+    if (runningTotal === null) {
+
+        runningTotal = number;
 
     }
 
-    // Melanjutkan perhitungan
+    // Kalau ada operasi sebelumnya
     else if (previousOperator !== null) {
 
-        FlushOperation(intBuffer);
+        runningTotal = calculate(
+            runningTotal,
+            number,
+            previousOperator
+        );
 
     }
 
-    else {
 
-        runningTotal = intBuffer;
+    previousOperator = operator;
 
-    }
-
-
-    // Simpan operator
-    previousOperator = symbol;
-
-    // Kosongkan buffer untuk angka berikutnya
-    buffer = '0';
+    buffer = "0";
 
 
-    // Reset "=" sebelumnya
+    // Simpan operasi untuk ditampilkan
+    previousOperation.innerText =
+        formatNumber(runningTotal) +
+        " " +
+        operator;
+
+
+    // Reset "="
     lastOperator = null;
     lastNumber = null;
 }
 
 
-// =========================
-// FLUSH OPERATION
-// =========================
+// ===============================
+// EQUAL
+// ===============================
 
-function FlushOperation(intBuffer) {
+function handleEquals() {
 
-    if (previousOperator === '+') {
+    // Contoh:
+    // 1 + 1 = 2
 
-        runningTotal += intBuffer;
+    if (
+        runningTotal !== null &&
+        previousOperator !== null
+    ) {
 
+        const number = Number(buffer);
+
+        const oldTotal = runningTotal;
+        const operator = previousOperator;
+
+
+        runningTotal = calculate(
+            runningTotal,
+            number,
+            operator
+        );
+
+
+        // Simpan untuk "=" berikutnya
+        lastOperator = operator;
+        lastNumber = number;
+
+
+        // Tampilkan operasi kecil
+        previousOperation.innerText =
+            formatNumber(oldTotal) +
+            " " +
+            operator +
+            " " +
+            formatNumber(number) +
+            " =";
+
+
+        buffer = runningTotal.toString();
+
+        previousOperator = null;
+
+        return;
     }
 
-    else if (previousOperator === '−') {
 
-        runningTotal -= intBuffer;
+    // ==========================
+    // "=" BERULANG
+    // ==========================
 
-    }
+    if (
+        runningTotal !== null &&
+        lastOperator !== null &&
+        lastNumber !== null
+    ) {
 
-    else if (previousOperator === '×') {
+        const oldTotal = runningTotal;
 
-        runningTotal *= intBuffer;
 
-    }
+        runningTotal = calculate(
+            runningTotal,
+            lastNumber,
+            lastOperator
+        );
 
-    else if (previousOperator === '÷') {
 
-        runningTotal /= intBuffer;
+        previousOperation.innerText =
+            formatNumber(oldTotal) +
+            " " +
+            lastOperator +
+            " " +
+            formatNumber(lastNumber) +
+            " =";
 
+
+        buffer = runningTotal.toString();
     }
 }
 
 
-// =========================
-// HANDLE NUMBER
-// =========================
+// ===============================
+// PERHITUNGAN
+// ===============================
 
-function handleNumber(numberString) {
+function calculate(first, second, operator) {
 
-    if (buffer === "0") {
+    switch (operator) {
 
-        buffer = numberString;
+        case "+":
+            return first + second;
 
-    }
+        case "−":
+            return first - second;
 
-    else {
+        case "×":
+            return first * second;
 
-        buffer += numberString;
+        case "÷":
 
+            if (second === 0) {
+                return NaN;
+            }
+
+            return first / second;
+
+        default:
+            return second;
     }
 }
 
 
-// =========================
-// INITIALIZE CALCULATOR
-// =========================
+// ===============================
+// KEYBOARD PC
+// ===============================
 
-function init() {
+document.addEventListener("keydown", function(event) {
 
-    document
-        .querySelector('.calc-buttons')
-        .addEventListener('click', function (event) {
+    const key = event.key;
+
+
+    // ANGKA
+    if (!isNaN(key)) {
+
+        buttonClick(key);
+    }
+
+
+    // +
+    else if (key === "+") {
+
+        buttonClick("+");
+    }
+
+
+    // -
+    else if (key === "-") {
+
+        buttonClick("−");
+    }
+
+
+    // *
+    else if (key === "*") {
+
+        buttonClick("×");
+    }
+
+
+    // /
+    else if (key === "/") {
+
+        event.preventDefault();
+
+        buttonClick("÷");
+    }
+
+
+    // ENTER
+    else if (key === "Enter") {
+
+        buttonClick("=");
+    }
+
+
+    // =
+    else if (key === "=") {
+
+        buttonClick("=");
+    }
+
+
+    // BACKSPACE
+    else if (key === "Backspace") {
+
+        buttonClick("←");
+    }
+
+
+    // ESC
+    else if (key === "Escape") {
+
+        buttonClick("C");
+    }
+
+});
+
+
+// ===============================
+// TOMBOL KALKULATOR
+// ===============================
+
+document
+    .querySelector(".calc-buttons")
+    .addEventListener("click", function(event) {
+
+        if (event.target.tagName === "BUTTON") {
 
             buttonClick(event.target.innerText);
+        }
 
-        });
+    });
 
-}
 
-init();
+// ===============================
+// AWAL
+// ===============================
+
+updateScreen();
