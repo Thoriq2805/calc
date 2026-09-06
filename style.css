@@ -73,3 +73,25 @@ body{
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.previous-operation {
+    font-size: 16px;
+    min-height: 20px;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.current-number {
+    font-size: 35px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+*,
+*::before,
+*::after {
+    box-sizing: inherit;
+    margin: 0;
+    padding: 0;
+}
