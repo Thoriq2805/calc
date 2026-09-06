@@ -1,152 +1,197 @@
-// ========================================
-// VARIABLES
-// ========================================
-
-let runningTotal = null;
-
+let runningTotal = 0;
 let buffer = "0";
-
 let previousOperator = null;
 
-
-// Untuk fitur "=" berulang
+// Untuk menyimpan operasi terakhir
 let lastOperator = null;
-
 let lastNumber = null;
 
-
-// Menentukan apakah kalkulator sedang
-// menunggu angka baru
-let waitingForOperand = false;
+const screen = document.querySelector('.screen');
 
 
-// ========================================
-// ELEMENT
-// ========================================
-
-const currentNumberDisplay =
-    document.querySelector('.current-number');
-
-const previousOperationDisplay =
-    document.querySelector('.previous-operation');
-
-
-// ========================================
-// FORMAT ANGKA
-// ========================================
-
-function formatNumber(value) {
-
-    if (value === 'Error') {
-        return 'Error';
-    }
-
-    const number = Number(value);
-
-    if (!Number.isFinite(number)) {
-        return 'Error';
-    }
-
-    return number.toLocaleString('id-ID', {
-        maximumFractionDigits: 10
-    });
-}
-
-
-// ========================================
-// UPDATE SCREEN
-// ========================================
-
-function updateScreen() {
-
-    currentNumberDisplay.innerText =
-        formatNumber(buffer);
-
-    previousOperationDisplay.innerText =
-        previousOperationDisplay.innerText;
-}
-
-
-// ========================================
-// TAMPILKAN OPERASI
-// ========================================
-
-function showOperation(text) {
-
-    previousOperationDisplay.innerText = text;
-
-}
-
-
-// ========================================
+// ==============================
 // BUTTON CLICK
-// ========================================
+// ==============================
 
 function buttonClick(value) {
 
     if (isNaN(value)) {
-
         handleSymbol(value);
-
     } else {
-
         handleNumber(value);
-
     }
 
-    updateScreen();
-
+    // Menampilkan angka dengan titik ribuan
+    screen.innerText = Number(buffer).toLocaleString('id-ID');
 }
 
 
-// ========================================
-// HANDLE NUMBER
-// ========================================
+// ==============================
+// HANDLE SYMBOL
+// ==============================
 
-function handleNumber(numberString) {
+function handleSymbol(symbol) {
 
-    // Kalau sebelumnya hasil "="
-    // lalu user mengetik angka baru
-    if (waitingForOperand && previousOperator === null) {
+    switch (symbol) {
 
-        buffer = numberString;
+        // CLEAR
+        case 'C':
+            buffer = '0';
+            runningTotal = 0;
+            previousOperator = null;
+            lastOperator = null;
+            lastNumber = null;
+            break;
 
-        runningTotal = null;
 
-        lastOperator = null;
+        // EQUAL
+        case '=':
 
-        lastNumber = null;
+            // Operasi pertama
+            if (previousOperator !== null) {
 
-        waitingForOperand = false;
+                lastNumber = parseInt(buffer);
+                lastOperator = previousOperator;
 
-        showOperation('');
+                FlushOperation(lastNumber);
 
+                buffer = runningTotal.toString();
+
+                previousOperator = null;
+            }
+
+            // Tekan "=" lagi
+            else if (lastOperator !== null && lastNumber !== null) {
+
+                previousOperator = lastOperator;
+
+                FlushOperation(lastNumber);
+
+                buffer = runningTotal.toString();
+
+                previousOperator = null;
+            }
+
+            break;
+
+
+        // BACKSPACE
+        case '←':
+
+            if (buffer.length === 1) {
+                buffer = '0';
+            } else {
+                buffer = buffer.substring(
+                    0,
+                    buffer.length - 1
+                );
+            }
+
+            break;
+
+
+        // OPERATOR
+        case '+':
+        case '−':
+        case '×':
+        case '÷':
+
+            handleMath(symbol);
+
+            break;
+    }
+}
+
+
+// ==============================
+// HANDLE MATH
+// ==============================
+
+function handleMath(symbol) {
+
+    if (buffer === '0') {
         return;
     }
 
-
-    // Maksimal 12 digit
-    if (buffer.replace('-', '').length >= 12) {
-
-        return;
-
-    }
-
-
-    // Kalau sedang menunggu angka
-    // setelah operator
-    if (waitingForOperand) {
-
-        buffer = numberString;
-
-        waitingForOperand = false;
-
-        return;
-    }
+    const intBuffer = parseInt(buffer);
 
 
     // Angka pertama
-    if (buffer === '0') {
+    if (
+        runningTotal === 0 &&
+        previousOperator === null
+    ) {
+
+        runningTotal = intBuffer;
+
+    }
+
+    // Melanjutkan operasi
+    else if (previousOperator !== null) {
+
+        FlushOperation(intBuffer);
+
+    }
+
+    else {
+
+        runningTotal = intBuffer;
+
+    }
+
+
+    // Simpan operator
+    previousOperator = symbol;
+
+    // Kosongkan buffer
+    buffer = '0';
+
+
+    // Reset operasi "=" sebelumnya
+    lastOperator = null;
+    lastNumber = null;
+}
+
+
+// ==============================
+// FLUSH OPERATION
+// ==============================
+
+function FlushOperation(intBuffer) {
+
+    if (previousOperator === '+') {
+
+        runningTotal += intBuffer;
+
+    }
+
+    else if (previousOperator === '−') {
+
+        runningTotal -= intBuffer;
+
+    }
+
+    else if (previousOperator === '×') {
+
+        runningTotal *= intBuffer;
+
+    }
+
+    else if (previousOperator === '÷') {
+
+        runningTotal /= intBuffer;
+
+    }
+}
+
+
+// ==============================
+// HANDLE NUMBER
+// ==============================
+
+function handleNumber(numberString) {
+
+    if (buffer === "0") {
 
         buffer = numberString;
 
@@ -155,496 +200,106 @@ function handleNumber(numberString) {
         buffer += numberString;
 
     }
-
-
-    // Kalau user mengetik angka baru,
-    // operasi "=" sebelumnya dibatalkan
-    lastOperator = null;
-
-    lastNumber = null;
 }
 
 
-// ========================================
-// HANDLE SYMBOL
-// ========================================
-
-function handleSymbol(symbol) {
-
-    // ==================================
-    // CLEAR
-    // ==================================
-
-    if (symbol === 'C') {
-
-        buffer = '0';
-
-        runningTotal = null;
-
-        previousOperator = null;
-
-        lastOperator = null;
-
-        lastNumber = null;
-
-        waitingForOperand = false;
-
-        showOperation('');
-
-        return;
-    }
-
-
-    // ==================================
-    // BACKSPACE
-    // ==================================
-
-    if (symbol === '←') {
-
-        if (waitingForOperand) {
-
-            return;
-
-        }
-
-
-        if (buffer.length <= 1) {
-
-            buffer = '0';
-
-        } else {
-
-            buffer = buffer.substring(
-                0,
-                buffer.length - 1
-            );
-
-        }
-
-        return;
-    }
-
-
-    // ==================================
-    // EQUAL
-    // ==================================
-
-    if (symbol === '=') {
-
-        handleEquals();
-
-        return;
-    }
-
-
-    // ==================================
-    // OPERATOR
-    // ==================================
-
-    if (
-        symbol === '+' ||
-        symbol === '−' ||
-        symbol === '×' ||
-        symbol === '÷'
-    ) {
-
-        handleOperator(symbol);
-
-    }
-
-}
-
-
-// ========================================
-// HANDLE OPERATOR
-// ========================================
-
-function handleOperator(symbol) {
-
-    const currentValue = Number(buffer);
-
-
-    // Kalau belum ada angka utama
-    if (runningTotal === null) {
-
-        runningTotal = currentValue;
-
-    }
-
-
-    // Kalau sudah ada operasi sebelumnya
-    else if (
-        previousOperator !== null &&
-        !waitingForOperand
-    ) {
-
-        runningTotal =
-            calculate(
-                runningTotal,
-                currentValue,
-                previousOperator
-            );
-
-    }
-
-
-    previousOperator = symbol;
-
-    waitingForOperand = true;
-
-
-    // Operator baru membatalkan
-    // "=" sebelumnya
-    lastOperator = null;
-
-    lastNumber = null;
-
-
-    // Tampilkan angka kecil + operator
-    showOperation(
-        formatNumber(runningTotal) +
-        ' ' +
-        symbol
-    );
-
-
-    buffer = '0';
-}
-
-
-// ========================================
-// HANDLE EQUAL
-// ========================================
-
-function handleEquals() {
-
-    // ==================================
-    // Operasi pertama
-    // ==================================
-
-    if (
-        previousOperator !== null &&
-        runningTotal !== null
-    ) {
-
-        let operand;
-
-
-        // Kalau angka sudah dimasukkan
-        if (!waitingForOperand) {
-
-            operand = Number(buffer);
-
-            lastNumber = operand;
-
-        }
-
-
-        // Kalau langsung tekan "="
-        else {
-
-            operand = lastNumber;
-
-        }
-
-
-        // Kalau belum ada angka terakhir
-        if (operand === null) {
-
-            return;
-
-        }
-
-
-        const oldTotal = runningTotal;
-
-        const operator = previousOperator;
-
-
-        runningTotal =
-            calculate(
-                runningTotal,
-                operand,
-                operator
-            );
-
-
-        // Simpan untuk "=" berikutnya
-        lastOperator = operator;
-
-        lastNumber = operand;
-
-
-        // Tampilkan operasi kecil
-        showOperation(
-            formatNumber(oldTotal) +
-            ' ' +
-            operator +
-            ' ' +
-            formatNumber(operand) +
-            ' ='
-        );
-
-
-        buffer = runningTotal.toString();
-
-        previousOperator = null;
-
-        waitingForOperand = true;
-
-        return;
-    }
-
-
-    // ==================================
-    // "=" berulang
-    // ==================================
-
-    if (
-        lastOperator !== null &&
-        lastNumber !== null &&
-        runningTotal !== null
-    ) {
-
-        const oldTotal = runningTotal;
-
-
-        runningTotal =
-            calculate(
-                runningTotal,
-                lastNumber,
-                lastOperator
-            );
-
-
-        showOperation(
-            formatNumber(oldTotal) +
-            ' ' +
-            lastOperator +
-            ' ' +
-            formatNumber(lastNumber) +
-            ' ='
-        );
-
-
-        buffer = runningTotal.toString();
-
-        waitingForOperand = true;
-    }
-
-}
-
-
-// ========================================
-// CALCULATE
-// ========================================
-
-function calculate(
-    firstNumber,
-    secondNumber,
-    operator
-) {
-
-    switch (operator) {
-
-        case '+':
-
-            return firstNumber + secondNumber;
-
-
-        case '−':
-
-            return firstNumber - secondNumber;
-
-
-        case '×':
-
-            return firstNumber * secondNumber;
-
-
-        case '÷':
-
-            if (secondNumber === 0) {
-
-                return NaN;
-
-            }
-
-            return firstNumber / secondNumber;
-
-
-        default:
-
-            return secondNumber;
-    }
-
-}
-
-
-// ========================================
-// KEYBOARD PC
-// ========================================
-
-function handleKeyboard(event) {
-
-    const key = event.key;
-
-
-    // ==================================
-    // ANGKA
-    // ==================================
-
-    if (!isNaN(key)) {
-
-        buttonClick(key);
-
-        return;
-    }
-
-
-    // ==================================
-    // TAMBAH
-    // ==================================
-
-    if (key === '+') {
-
-        buttonClick('+');
-
-        return;
-    }
-
-
-    // ==================================
-    // KURANG
-    // ==================================
-
-    if (key === '-') {
-
-        buttonClick('−');
-
-        return;
-    }
-
-
-    // ==================================
-    // KALI
-    // ==================================
-
-    if (key === '*') {
-
-        buttonClick('×');
-
-        return;
-    }
-
-
-    // ==================================
-    // BAGI
-    // ==================================
-
-    if (key === '/') {
-
-        event.preventDefault();
-
-        buttonClick('÷');
-
-        return;
-    }
-
-
-    // ==================================
-    // ENTER
-    // ==================================
-
-    if (key === 'Enter') {
-
-        buttonClick('=');
-
-        return;
-    }
-
-
-    // ==================================
-    // =
-    // ==================================
-
-    if (key === '=') {
-
-        buttonClick('=');
-
-        return;
-    }
-
-
-    // ==================================
-    // BACKSPACE
-    // ==================================
-
-    if (key === 'Backspace') {
-
-        buttonClick('←');
-
-        return;
-    }
-
-
-    // ==================================
-    // ESC
-    // ==================================
-
-    if (key === 'Escape') {
-
-        buttonClick('C');
-
-        return;
-    }
-
-}
-
-
-// ========================================
+// ==============================
 // INITIALIZE
-// ========================================
+// ==============================
 
 function init() {
-
 
     // Tombol kalkulator
     document
         .querySelector('.calc-buttons')
-        .addEventListener(
-            'click',
-            function (event) {
+        .addEventListener('click', function(event) {
 
-                if (
-                    event.target.tagName === 'BUTTON'
-                ) {
+            buttonClick(event.target.innerText);
 
-                    buttonClick(
-                        event.target.innerText
-                    );
-
-                }
-
-            }
-        );
+        });
 
 
-    // Keyboard PC
-    document.addEventListener(
-        'keydown',
-        handleKeyboard
-    );
+    // ==============================
+    // KEYBOARD PC
+    // ==============================
+
+    document.addEventListener('keydown', function(event) {
+
+        const key = event.key;
 
 
-    // Tampilan awal
-    updateScreen();
+        // ANGKA 0 - 9
+        if (!isNaN(key)) {
+
+            buttonClick(key);
+
+        }
+
+
+        // TAMBAH
+        else if (key === '+') {
+
+            buttonClick('+');
+
+        }
+
+
+        // KURANG
+        else if (key === '-') {
+
+            buttonClick('−');
+
+        }
+
+
+        // KALI
+        else if (key === '*') {
+
+            buttonClick('×');
+
+        }
+
+
+        // BAGI
+        else if (key === '/') {
+
+            event.preventDefault();
+
+            buttonClick('÷');
+
+        }
+
+
+        // ENTER / =
+        else if (
+            key === 'Enter' ||
+            key === '='
+        ) {
+
+            buttonClick('=');
+
+        }
+
+
+        // BACKSPACE
+        else if (key === 'Backspace') {
+
+            buttonClick('←');
+
+        }
+
+
+        // ESC = CLEAR
+        else if (key === 'Escape') {
+
+            buttonClick('C');
+
+        }
+
+    });
 
 }
 
 
-// ========================================
-// START
-// ========================================
-
+// Jalankan kalkulator
 init();
