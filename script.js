@@ -416,3 +416,44 @@ document
 // ===============================
 
 updateScreen();
+document.addEventListener("keydown", function (event) {
+    const key = event.key;
+
+    // Angka 0-9
+    if (key >= "0" && key <= "9") {
+        buttonClick(key);
+    }
+
+    // Operator
+    else if (key === "+") {
+        buttonClick("+");
+    }
+
+    else if (key === "-") {
+        buttonClick("−");
+    }
+
+    else if (key === "*") {
+        buttonClick("×");
+    }
+
+    else if (key === "/") {
+        event.preventDefault();
+        buttonClick("÷");
+    }
+
+    // Enter atau =
+    else if (key === "Enter" || key === "=") {
+        buttonClick("=");
+    }
+
+    // Backspace
+    else if (key === "Backspace") {
+        buttonClick("←");
+    }
+
+    // Escape
+    else if (key === "Escape") {
+        buttonClick("C");
+    }
+});
