@@ -13,22 +13,16 @@ html {
 
 body {
     align-items: center;
-
     background: linear-gradient(
         320deg,
         #eb92be,
         #ffef78,
         #63c9b4
     );
-
     display: flex;
-
     font-family: 'Dosis', sans-serif;
-
     min-height: 100vh;
-
     justify-content: center;
-
     padding: 20px;
 }
 
@@ -38,6 +32,9 @@ body {
 ========================= */
 
 .wrapper {
+    display: flex;
+    flex-direction: column;
+
     backdrop-filter: blur(5.5px);
     -webkit-backdrop-filter: blur(5.5px);
 
@@ -53,7 +50,6 @@ body {
     color: #232323;
 
     width: 400px;
-
     height: 540px;
 
     padding: 25px 30px;
@@ -80,15 +76,12 @@ body {
     color: #232323;
 
     width: 100%;
-
     height: 84px;
 
     padding: 8px 20px;
 
     display: flex;
-
     flex-direction: column;
-
     justify-content: center;
 
     text-align: right;
@@ -98,16 +91,24 @@ body {
 
 
 /* =========================
+   CALCULATOR BUTTONS
+========================= */
+
+.calc-buttons {
+    display: block;
+    width: 100%;
+}
+
+
+/* =========================
    OPERASI KECIL
 ========================= */
 
 .previous-operation {
     width: 100%;
-
     height: 20px;
 
     font-size: 15px;
-
     line-height: 20px;
 
     opacity: 0.55;
@@ -126,11 +127,9 @@ body {
 
 .current-number {
     width: 100%;
-
     height: 40px;
 
     font-size: 35px;
-
     line-height: 40px;
 
     white-space: nowrap;
@@ -193,7 +192,6 @@ body {
 
 .calc-button:last-child {
     background: #d72880;
-
     color: #fff;
 }
 
@@ -203,12 +201,11 @@ body {
 ========================= */
 
 .calc-button:hover {
-    background: rgba(255, 255, 255, 0.95);
+    background-color: rgba(255, 255, 255, 0.95);
 }
 
 .calc-button:last-child:hover {
-    background: #c51f73;
-
+    background-color: #c51f73;
     color: #fff;
 }
 
@@ -218,8 +215,7 @@ body {
 ========================= */
 
 .calc-button:active {
-    background: #ffef78;
-
+    background-color: #ffef78;
     transform: scale(0.95);
 }
 
@@ -238,7 +234,7 @@ body {
 
 
 /* =========================
-   HP
+   HP / MOBILE
 ========================= */
 
 @media (max-width: 480px) {
@@ -249,11 +245,8 @@ body {
 
     .wrapper {
         width: 100%;
-
         max-width: 400px;
-
         height: 540px;
-
         padding: 25px 20px;
     }
 
@@ -271,7 +264,6 @@ body {
 
     .calc-button {
         height: 60px;
-
         font-size: 22px;
     }
 }
