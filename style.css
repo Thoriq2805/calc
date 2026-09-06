@@ -1,104 +1,240 @@
-html{
+html {
     box-sizing: border-box;
     height: 100%;
 }
 
 *,
 *::before,
-*::after{
+*::after {
     box-sizing: inherit;
     margin: 0;
     padding: 0;
 }
 
-body{
+body {
     align-items: center;
     background: linear-gradient(320deg, #eb92be, #ffef78, #63c9b4);
-    display: flex; 
-    font-family: 'Dosis',sans-serif;
-    font-display: swap;
-    height: inherit;
+    display: flex;
+    font-family: 'Dosis', sans-serif;
+    height: 100%;
     justify-content: center;
+    padding: 20px;
 }
 
-.wrapper{
+
+/* =========================
+   WRAPPER
+========================= */
+
+.wrapper {
     backdrop-filter: blur(5.5px);
     -webkit-backdrop-filter: blur(5.5px);
-    border-radius: 16px;
-    box-shadow: 0 4px 30px rgba(35, 35, 35, 0.1);
-    color: #232323;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    background: rgba(255, 255, 255, 0.30 );
+
+    background: rgba(255, 255, 255, 0.30);
+
     border: 1px solid rgba(255, 255, 255, 0.34);
-    flex-basis: 400px;
+
+    border-radius: 16px;
+
+    box-shadow: 0 4px 30px rgba(35, 35, 35, 0.1);
+
+    color: #232323;
+
+    width: 400px;
     height: 540px;
-    padding: 25px 30px;   
+
+    padding: 25px 30px;
 }
 
-.screen{
+
+/* =========================
+   SCREEN
+========================= */
+
+.screen {
     backdrop-filter: blur(5.5px);
-   -webkit-backdrop-filter: blur(5.5px); 
-   background: rgba(255, 255, 255, 0.75);
-   border: 1px solid rgba(255, 255, 255, 0.01);
-   border-radius: 16px;
-   box-shadow: 0 4px 30px rgba(35, 35, 35, 0.1);
-   color: #232323;
-   font-size: 35px;
-   overflow: auto;
-   padding: 20px;
-   text-align: right;
-   width: 326px;
+    -webkit-backdrop-filter: blur(5.5px);
 
+    background: rgba(255, 255, 255, 0.75);
+
+    border: 1px solid rgba(255, 255, 255, 0.01);
+
+    border-radius: 16px;
+
+    box-shadow: 0 4px 30px rgba(35, 35, 35, 0.1);
+
+    color: #232323;
+
+    width: 100%;
+    height: 84px;
+
+    padding: 8px 20px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    text-align: right;
+
+    overflow: hidden;
 }
-.calc-button-row{
+
+
+/* =========================
+   ANGKA / OPERASI KECIL
+========================= */
+
+.previous-operation {
+    font-size: 16px;
+    min-height: 20px;
+
+    opacity: 0.55;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================
+   ANGKA UTAMA
+========================= */
+
+.current-number {
+    font-size: 35px;
+    line-height: 40px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* =========================
+   BARIS TOMBOL
+========================= */
+
+.calc-button-row {
     display: flex;
     justify-content: space-between;
+
     margin: 5% 0;
 }
 
-.calc-button{
+
+/* =========================
+   TOMBOL
+========================= */
+
+.calc-button {
     backdrop-filter: blur(5.5px);
     -webkit-backdrop-filter: blur(5.5px);
+
     background: rgba(255, 255, 255, 0.75);
+
     border: 1px solid rgba(255, 255, 255, 0.1);
+
     border-radius: 16px;
+
     box-shadow: 0 4px 30px rgba(35, 35, 35, 0.1);
+
     color: #232323;
+
     flex-basis: 20%;
+
     font-family: inherit;
     font-size: 24px;
+
     height: 64px;
+
+    cursor: pointer;
+
+    transition: 0.1s;
 }
 
-.calc-button:last-child{
-    backdrop-filter: blur(5.5px);
-    -webkit-backdrop-filter: blur(5.5px);
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
-    box-shadow: 0 4px 30px rgba(35, 35, 35, 0.1);
-    color: #fff;
+
+/* =========================
+   TOMBOL OPERATOR
+========================= */
+
+.calc-button:last-child {
     background: #d72880;
+    color: #fff;
 }
 
-.calc-button:last-child:hover{
-    background-color: inherit;
-    color: inherit;
+
+/* =========================
+   HOVER
+========================= */
+
+.calc-button:hover {
+    background-color: rgba(255, 255, 255, 0.95);
 }
 
-.calc-button:hover{
-    background-color: inherit;
+.calc-button:last-child:hover {
+    background-color: #c51f73;
+    color: #fff;
 }
 
-.calc-button:active{
+
+/* =========================
+   ACTIVE
+========================= */
+
+.calc-button:active {
     background-color: #ffef78;
+    transform: scale(0.95);
 }
 
-.double{
+
+/* =========================
+   UKURAN TOMBOL
+========================= */
+
+.double {
     flex-basis: 47%;
 }
 
-.triple{
+.triple {
     flex-basis: 73%;
+}
+
+
+/* =========================
+   HP
+========================= */
+
+@media (max-width: 480px) {
+
+    body {
+        padding: 15px;
+    }
+
+    .wrapper {
+        width: 100%;
+        max-width: 400px;
+
+        height: auto;
+
+        padding: 20px;
+    }
+
+    .screen {
+        height: 84px;
+    }
+
+    .current-number {
+        font-size: 30px;
+    }
+
+    .previous-operation {
+        font-size: 14px;
+    }
+
+    .calc-button {
+        height: 60px;
+        font-size: 22px;
+    }
 }
